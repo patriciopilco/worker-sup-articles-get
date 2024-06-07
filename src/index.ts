@@ -11,8 +11,21 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+import { createClient } from '@supabase/supabase-js'
+interface Env {
+  SUPABASE_URL: string;
+  SUPABASE_KEY: string;
+}
+
 export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		return new Response('Hello World!');
-	},
-};
+  async fetch(request: Request,env:Env) {
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_KEY)
+    const { data, error } = await supabase.from('articles').select('*')
+    if (error) throw error
+    return new Response(JSON.stringify(data), {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+  },
+}
